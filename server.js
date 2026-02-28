@@ -6,7 +6,6 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Health check endpoint for Render
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
@@ -26,7 +25,7 @@ const io = new Server(server, {
 // --- GLOBAL CHAT STATE ---
 const chatMessages = [];
 const MAX_MESSAGES = 50;
-let isChatMuted = false; // New: Global mute state
+let isChatMuted = false;
 
 // --- CRASH GAME STATE ---
 let crashState = 'WAITING';
@@ -38,7 +37,7 @@ let crashInterval = null;
 function generateCrashPoint() {
     const e = 2 ** 32;
     const h = require('crypto').randomBytes(4).readUInt32LE(0);
-    if (h % 100 === 0) return 1.00; // 1% edge
+    if (h % 100 === 0) return 1.00;
     const crashPoint = Math.max(1.00, (100 * e - h) / (e - h)) / 100;
     return Math.max(1.01, parseFloat(crashPoint.toFixed(2)));
 }
@@ -93,9 +92,7 @@ function runCrashPhase() {
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
-    // 1. Send current states to new connection
     socket.emit('chat_history', chatMessages);
-    // Tell new user if chat is currently muted
     if (isChatMuted) {
         socket.emit('new_chat_message', { 
             author: 'SYSTEM', 
@@ -111,9 +108,8 @@ io.on('connection', (socket) => {
         multiplier: crashMultiplier
     });
 
-    // 2. Chat listener (UPDATED WITH MUTE CHECK)
+    // Chat
     socket.on('send_chat', (data) => {
-        // If chat is muted and user is NOT owner, block the message
         if (isChatMuted && !data.isOwner) {
             return; 
         }
@@ -132,14 +128,12 @@ io.on('connection', (socket) => {
         io.emit('new_chat_message', msg);
     });
 
-    // 3. NEW: Admin Command Listener (Clear Chat / Mute Chat)
+    // Admin Commands
     socket.on('admin_command', (data) => {
-        // Clear Chat
         if (data.command === 'clear_chat') {
-            chatMessages.length = 0; // Empty the array
-            io.emit('chat_history', []); // Update everyone's view
+            chatMessages.length = 0;
+            io.emit('chat_history', []);
             
-            // Send system notification
             const sysMsg = { 
                 author: 'SYSTEM', 
                 text: '🧹 Chat history has been cleared by an Admin.', 
@@ -150,7 +144,6 @@ io.on('connection', (socket) => {
             io.emit('new_chat_message', sysMsg);
         }
 
-        // Toggle Mute
         if (data.command === 'toggle_mute') {
             isChatMuted = !isChatMuted;
             const status = isChatMuted ? 'LOCKED 🔒' : 'UNLOCKED 🔓';
@@ -164,9 +157,18 @@ io.on('connection', (socket) => {
             chatMessages.push(sysMsg);
             io.emit('new_chat_message', sysMsg);
         }
+        
+        // Gift coins notification
+        if (data.command === 'gift_coins') {
+            io.emit('gift_notification', {
+                targetUsername: data.targetUsername,
+                targetId: data.targetId,
+                amount: data.amount
+            });
+        }
     });
 
-    // 4. Global Announcement (UPDATED)
+    // Announcements
     socket.on('global_announcement', (data) => {
         const msg = {
             author: '📢 ANNOUNCEMENT',
@@ -177,15 +179,28 @@ io.on('connection', (socket) => {
         chatMessages.push(msg);
         if (chatMessages.length > MAX_MESSAGES) chatMessages.shift();
         io.emit('new_chat_message', msg);
+        
+        // Also emit as dedicated announcement event
+        io.emit('global_announcement', { text: data.text });
     });
 
-    // 5. Crash Game Bets
+    // Crash bets
     socket.on('crash_place_bet', (data) => {
         socket.broadcast.emit('crash_live_bet', data);
     });
 
     socket.on('crash_cashout', (data) => {
         socket.broadcast.emit('crash_live_cashout', data);
+    });
+    
+    // Donation socket relay
+    socket.on('donation_sent', (data) => {
+        io.emit('donation_received', {
+            fromUsername: data.fromUsername,
+            toUsername: data.toUsername,
+            toUserId: data.toUserId,
+            amount: data.amount
+        });
     });
 
     socket.on('disconnect', () => {
