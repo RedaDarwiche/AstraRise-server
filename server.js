@@ -38,15 +38,34 @@ const CASE_TAGS_SERVER = [
     { id: 'legendary_tag', name: 'Legendary', value: 400, rarity: 5 },
     { id: 'mythic_tag', name: 'Mythic', value: 800, rarity: 3 },
     { id: 'divine_tag', name: 'Divine', value: 2000, rarity: 1.5 },
-    { id: 'astral_tag', name: 'Astral', value: 5000, rarity: 0.5 }
+    { id: 'astral_tag', name: 'Astral', value: 5000, rarity: 0.5 },
+    { id: 'celestial_tag', name: 'Celestial', value: 12000, rarity: 0.3 },
+    { id: 'transcendent_tag', name: 'Transcendent', value: 30000, rarity: 0.15 },
+    { id: 'eternal_tag', name: 'Eternal', value: 75000, rarity: 0.08 },
+    { id: 'godlike_tag', name: 'Godlike', value: 200000, rarity: 0.04 },
+    { id: 'omega_tag', name: 'Omega', value: 500000, rarity: 0.02 },
+    { id: 'infinity_tag', name: 'Infinity', value: 1500000, rarity: 0.01 },
+    { id: 'void_tag', name: 'Void', value: 5000000, rarity: 0.005 },
+    { id: 'astra_supreme_tag', name: 'Astra Supreme', value: 20000000, rarity: 0.002 }
 ];
 
 const CASE_TIERS_SERVER = [
-    { id: 'starter', cost: 50, tags: ['common_tag', 'uncommon_tag', 'rare_tag'] },
-    { id: 'mid', cost: 200, tags: ['uncommon_tag', 'rare_tag', 'epic_tag', 'legendary_tag'] },
-    { id: 'premium', cost: 500, tags: ['rare_tag', 'epic_tag', 'legendary_tag', 'mythic_tag'] },
-    { id: 'ultra', cost: 1500, tags: ['epic_tag', 'legendary_tag', 'mythic_tag', 'divine_tag'] },
-    { id: 'astral', cost: 5000, tags: ['legendary_tag', 'mythic_tag', 'divine_tag', 'astral_tag'] }
+    { id: 'basic', cost: 100, tags: ['common_tag', 'uncommon_tag'] },
+    { id: 'starter', cost: 250, tags: ['common_tag', 'uncommon_tag', 'rare_tag'] },
+    { id: 'mid', cost: 500, tags: ['uncommon_tag', 'rare_tag', 'epic_tag', 'legendary_tag'] },
+    { id: 'astraphobia1k', cost: 1000, tags: ['rare_tag', 'epic_tag', 'legendary_tag', 'mythic_tag'] },
+    { id: 'premium', cost: 2500, tags: ['epic_tag', 'legendary_tag', 'mythic_tag', 'divine_tag'] },
+    { id: 'ultra', cost: 5000, tags: ['legendary_tag', 'mythic_tag', 'divine_tag', 'astral_tag'] },
+    { id: 'astral', cost: 10000, tags: ['mythic_tag', 'divine_tag', 'astral_tag', 'celestial_tag'] },
+    { id: 'astraphobia25k', cost: 25000, tags: ['divine_tag', 'astral_tag', 'celestial_tag', 'transcendent_tag'] },
+    { id: 'astraphobia50k', cost: 50000, tags: ['astral_tag', 'celestial_tag', 'transcendent_tag', 'eternal_tag'] },
+    { id: 'astraphobia100k', cost: 100000, tags: ['celestial_tag', 'transcendent_tag', 'eternal_tag', 'godlike_tag'] },
+    { id: 'astraphobia250k', cost: 250000, tags: ['transcendent_tag', 'eternal_tag', 'godlike_tag', 'omega_tag'] },
+    { id: 'astraphobia500k', cost: 500000, tags: ['eternal_tag', 'godlike_tag', 'omega_tag', 'infinity_tag'] },
+    { id: 'astraphobia1m', cost: 1000000, tags: ['godlike_tag', 'omega_tag', 'infinity_tag', 'void_tag'] },
+    { id: 'astraphobia10m', cost: 10000000, tags: ['omega_tag', 'infinity_tag', 'void_tag', 'astra_supreme_tag'] },
+    { id: 'astraphobia100m', cost: 100000000, tags: ['infinity_tag', 'void_tag', 'astra_supreme_tag'] },
+    { id: 'astraphobia1b', cost: 1000000000, tags: ['void_tag', 'astra_supreme_tag'] }
 ];
 
 function serverGetRandomTag(tagIds) {
