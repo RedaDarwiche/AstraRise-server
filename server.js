@@ -53,19 +53,19 @@ const CASE_TIERS_SERVER = [
     { id: 'basic', cost: 100, tags: ['common_tag', 'uncommon_tag'] },
     { id: 'starter', cost: 250, tags: ['common_tag', 'uncommon_tag', 'rare_tag'] },
     { id: 'mid', cost: 500, tags: ['uncommon_tag', 'rare_tag', 'epic_tag', 'legendary_tag'] },
-    { id: 'astraphobia1k', cost: 1000, tags: ['rare_tag', 'epic_tag', 'legendary_tag', 'mythic_tag'] },
+    { id: 'hunter', cost: 1000, tags: ['rare_tag', 'epic_tag', 'legendary_tag', 'mythic_tag'] },
     { id: 'premium', cost: 2500, tags: ['epic_tag', 'legendary_tag', 'mythic_tag', 'divine_tag'] },
     { id: 'ultra', cost: 5000, tags: ['legendary_tag', 'mythic_tag', 'divine_tag', 'astral_tag'] },
     { id: 'astral', cost: 10000, tags: ['mythic_tag', 'divine_tag', 'astral_tag', 'celestial_tag'] },
-    { id: 'astraphobia25k', cost: 25000, tags: ['divine_tag', 'astral_tag', 'celestial_tag', 'transcendent_tag'] },
-    { id: 'astraphobia50k', cost: 50000, tags: ['astral_tag', 'celestial_tag', 'transcendent_tag', 'eternal_tag'] },
-    { id: 'astraphobia100k', cost: 100000, tags: ['celestial_tag', 'transcendent_tag', 'eternal_tag', 'godlike_tag'] },
-    { id: 'astraphobia250k', cost: 250000, tags: ['transcendent_tag', 'eternal_tag', 'godlike_tag', 'omega_tag'] },
-    { id: 'astraphobia500k', cost: 500000, tags: ['eternal_tag', 'godlike_tag', 'omega_tag', 'infinity_tag'] },
-    { id: 'astraphobia1m', cost: 1000000, tags: ['godlike_tag', 'omega_tag', 'infinity_tag', 'void_tag'] },
-    { id: 'astraphobia10m', cost: 10000000, tags: ['omega_tag', 'infinity_tag', 'void_tag', 'astra_supreme_tag'] },
-    { id: 'astraphobia100m', cost: 100000000, tags: ['infinity_tag', 'void_tag', 'astra_supreme_tag'] },
-    { id: 'astraphobia1b', cost: 1000000000, tags: ['void_tag', 'astra_supreme_tag'] }
+    { id: 'phantom', cost: 25000, tags: ['divine_tag', 'astral_tag', 'celestial_tag', 'transcendent_tag'] },
+    { id: 'eclipse', cost: 50000, tags: ['astral_tag', 'celestial_tag', 'transcendent_tag', 'eternal_tag'] },
+    { id: 'inferno', cost: 100000, tags: ['celestial_tag', 'transcendent_tag', 'eternal_tag', 'godlike_tag'] },
+    { id: 'tempest', cost: 250000, tags: ['transcendent_tag', 'eternal_tag', 'godlike_tag', 'omega_tag'] },
+    { id: 'nebula', cost: 500000, tags: ['eternal_tag', 'godlike_tag', 'omega_tag', 'infinity_tag'] },
+    { id: 'sovereign', cost: 1000000, tags: ['godlike_tag', 'omega_tag', 'infinity_tag', 'void_tag'] },
+    { id: 'oblivion', cost: 10000000, tags: ['omega_tag', 'infinity_tag', 'void_tag', 'astra_supreme_tag'] },
+    { id: 'singularity', cost: 100000000, tags: ['infinity_tag', 'void_tag', 'astra_supreme_tag'] },
+    { id: 'genesis', cost: 1000000000, tags: ['void_tag', 'astra_supreme_tag'] }
 ];
 
 function serverGetRandomTag(tagIds) {
@@ -263,3 +263,4 @@ server.listen(PORT, () => {
     console.log(`AstraRise backend running on port ${PORT}`);
     startCrashGameLoop();
 });
+
