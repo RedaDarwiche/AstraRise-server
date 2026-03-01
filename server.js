@@ -188,8 +188,13 @@ io.on('connection', (socket) => {
                 io.emit('rain_received', { amount: data.amount || 0 });
                 break;
             case 'gift_coins':
-                io.emit('gift_notification', { targetUsername: data.targetUsername, targetId: data.targetId, amount: data.amount });
-                break;
+    io.emit('gift_notification', { 
+        targetUsername: data.targetUsername, 
+        targetId: data.targetId, 
+        amount: data.amount,
+        senderName: data.senderName || 'Admin'
+    });
+    break;
         }
     });
 
@@ -224,3 +229,4 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => { console.log(`AstraRise on port ${PORT}`); startCrashGameLoop(); });
+
