@@ -64,16 +64,38 @@ function serverGetRandomTag(tagIds) {
     return pool[0];
 }
 
-function runCaseBattle(lobby, p2Id, p2Name, p2Rank) {
-    const tier = CASE_TIERS_SERVER.find(t => t.id === lobby.caseId) || CASE_TIERS_SERVER[0];
-    const t1 = serverGetRandomTag(tier.tags), t2 = serverGetRandomTag(tier.tags);
-    io.emit('case_battle_start', {
-        lobbyId: lobby.id, caseId: lobby.caseId,
-        player1Id: lobby.creatorId, player1Name: lobby.creatorName, player1TagId: t1.id, player1Rank: lobby.creatorRank || null,
-        player2Id: p2Id, player2Name: p2Name, player2TagId: t2.id, player2Rank: p2Rank || null,
-        winnerId: t1.value >= t2.value ? lobby.creatorId : p2Id
-    });
-    caseLobbies = caseLobbies.filter(l => l.id !== lobby.id);
+function runCaseBattle(lobby, player2Id, player2Name, player2Rank, player2IsOwner) {
+  const tier = CASE_TIERS_SERVER.find(t => t.id === lobby.caseId) || CASE_TIERS_SERVER[0];
+
+  let p1Tag, p2Tag;
+  // reroll until NOT a draw
+  do {
+    p1Tag = serverGetRandomTag(tier.tags);
+    p2Tag = serverGetRandomTag(tier.tags);
+  } while (p1Tag.value === p2Tag.value);
+
+  const winnerId = (p1Tag.value > p2Tag.value) ? lobby.creatorId : player2Id;
+
+  io.emit('case_battle_start', {
+    lobbyId: lobby.id,
+    caseId: lobby.caseId,
+
+    player1Id: lobby.creatorId,
+    player1Name: lobby.creatorName,
+    player1TagId: p1Tag.id,
+    player1Rank: lobby.creatorRank || null,
+    player1IsOwner: !!lobby.creatorIsOwner,
+
+    player2Id: player2Id,
+    player2Name: player2Name,
+    player2TagId: p2Tag.id,
+    player2Rank: player2Rank || null,
+    player2IsOwner: !!player2IsOwner,
+
+    winnerId
+  });
+
+  caseLobbies = caseLobbies.filter(l => l.id !== lobby.id);
 }
 
 function generateCrashPoint() {
@@ -192,7 +214,9 @@ io.on('connection', (socket) => {
         targetUsername: data.targetUsername, 
         targetId: data.targetId, 
         amount: data.amount,
-        senderName: data.senderName || 'Admin'
+        senderName: data.senderName || 'Admin',
+        senderIsOwner: !!data.senderIsOwner,
+        senderRank: data.senderRank || null
     });
     break;
         }
@@ -210,17 +234,41 @@ io.on('connection', (socket) => {
 
     socket.on('case_get_lobbies', () => socket.emit('case_lobby_list', caseLobbies));
     socket.on('case_create_lobby', (data) => {
-        const lobby = { id: crypto.randomUUID(), creatorId: data.creatorId, creatorName: data.creatorName, creatorRank: data.creatorRank || null, caseId: data.caseId, cost: data.cost, socketId: socket.id, createdAt: Date.now() };
+        const lobby = {
+  id: crypto.randomUUID(),
+  creatorId: data.creatorId,
+  creatorName: data.creatorName,
+  creatorRank: data.creatorRank || null,
+  creatorIsOwner: !!data.creatorIsOwner,
+  caseId: data.caseId,
+  cost: data.cost,
+  socketId: socket.id,
+  createdAt: Date.now()
+};
         caseLobbies.push(lobby); io.emit('case_lobby_created', lobby);
     });
     socket.on('case_cancel_lobby', (data) => { caseLobbies = caseLobbies.filter(l => l.id !== data.lobbyId); io.emit('case_lobby_removed', data.lobbyId); });
     socket.on('case_join_lobby', (data) => {
-        const lobby = caseLobbies.find(l => l.id === data.lobbyId);
-        if (!lobby) { socket.emit('case_lobby_removed', data.lobbyId); return; }
-        if (lobby.creatorId === data.joinerId) return;
-        runCaseBattle(lobby, data.joinerId, data.joinerName, data.joinerRank || null);
-    });
-    socket.on('case_bot_join', (data) => { const l = caseLobbies.find(x => x.id === data.lobbyId); if (l) runCaseBattle(l, 'bot', '🤖 Bot', null); });
+  const lobby = caseLobbies.find(l => l.id === data.lobbyId);
+  if (!lobby) {
+    socket.emit('case_lobby_removed', data.lobbyId);
+    return;
+  }
+  if (lobby.creatorId === data.joinerId) return;
+
+  runCaseBattle(
+    lobby,
+    data.joinerId,
+    data.joinerName,
+    data.joinerRank || null,
+    !!data.joinerIsOwner
+  );
+});
+    socket.on('case_bot_join', (data) => { 
+  const l = caseLobbies.find(x => x.id === data.lobbyId); 
+  if (!l) return;
+  runCaseBattle(l, 'bot', '🤖 Bot', null, false);
+});
     socket.on('disconnect', () => {
         caseLobbies.filter(l => l.socketId === socket.id).forEach(l => io.emit('case_lobby_removed', l.id));
         caseLobbies = caseLobbies.filter(l => l.socketId !== socket.id);
@@ -229,4 +277,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => { console.log(`AstraRise on port ${PORT}`); startCrashGameLoop(); });
+
 
